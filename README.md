@@ -13,7 +13,7 @@ mvn clean package
 
 java -jar worker-1.0-SNAPSHOT.jar <port>
 
-## Sample output
+## Sample output
 
 `curl localhost:8009`
 
