@@ -7,11 +7,11 @@ The server delivers the data accumulated since the last request and then forgets
 
 ## To build
 
-mvn clean package
+`mvn clean package`
 
 ## To run
 
-java -jar worker-1.0-SNAPSHOT.jar <port>
+`java -jar worker-1.0-SNAPSHOT.jar <port>`
 
 ## Sample output
 
