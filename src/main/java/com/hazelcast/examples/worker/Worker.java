@@ -4,10 +4,12 @@ import io.undertow.Undertow;
 import io.undertow.server.HttpServerExchange;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static io.undertow.util.Headers.CONTENT_TYPE;
@@ -20,7 +22,7 @@ import static java.lang.Runtime.getRuntime;
  */
 public class Worker {
     private static final int NUM_WORKER_THREADS = 4;
-    private final Queue<Entry<Long, Long>> q = new ConcurrentLinkedDeque<>();
+    private final BlockingQueue<Entry<Long, Long>> queue = new LinkedBlockingQueue<>();
 
     public static void main(String[] args) {
         if (args.length != 1) {
@@ -58,7 +60,7 @@ public class Worker {
         Thread t = new Thread(() -> {
             while (true) {
                 long monitoredValue = getRuntime().totalMemory() - getRuntime().freeMemory();
-                q.add(new SimpleImmutableEntry<>(System.currentTimeMillis(), monitoredValue));
+                queue.add(new SimpleImmutableEntry<>(System.currentTimeMillis(), monitoredValue));
                 sleep(10);
             }
         });
@@ -83,12 +85,13 @@ public class Worker {
 
     private void handleRequest(HttpServerExchange exchange) {
         exchange.getResponseHeaders().put(CONTENT_TYPE, "text/plain");
-        if (q.isEmpty()) {
+        List<Entry<Long, Long>> tmpList = new ArrayList<>();
+        queue.drainTo(tmpList);
+        if (tmpList.isEmpty()) {
             return;
         }
         StringBuilder b = new StringBuilder();
-        for (int i = q.size(); i > 0; i--) {
-            Map.Entry<Long, Long> event = q.remove();
+        for (Map.Entry<Long, Long> event : tmpList) {
             b.append(event.getKey()).append(' ')
              .append(event.getValue()).append('\n');
         }
