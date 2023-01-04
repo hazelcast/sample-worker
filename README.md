@@ -29,5 +29,4 @@ The server delivers the data accumulated since the last request and then forgets
 1542277639408 53899672
 1542277639420 53899672
 1542277639432 53899672
-1542277639444 53899672
 ```
